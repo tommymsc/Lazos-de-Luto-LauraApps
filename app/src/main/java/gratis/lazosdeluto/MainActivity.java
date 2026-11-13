@@ -18,13 +18,14 @@ import java.util.*;
 public class MainActivity extends Activity {
  private LinearLayout main,items; private boolean favorites=false; private int filter=0, saves=0; private SharedPreferences prefs; private AdView banner; private InterstitialAd interstitial;
  private final int INK=Color.rgb(31,34,43);
- private final String[] filters={"Todos","Clásicos","Florales","Serenos","Minimalistas","Conmemorativos"};
+ private final String[] filters={"Todos","Elegantes","Sobrios","Florales","Religiosos","Modernos"};
+ private final String[] names={"Rosa de plata","Lirio de luz","Lazo de paz","Jardín de recuerdos","Orquídea violeta","Lirio al atardecer","Luz de esperanza","Paloma de consuelo","Luz de amor","Hasta siempre"};
  @Override public void onCreate(Bundle state){super.onCreate(state);prefs=getSharedPreferences("lazos_favorites",MODE_PRIVATE);show();requestAds();}
  private TextView text(String s,int sp){TextView t=new TextView(this);t.setText(s);t.setTextSize(sp);t.setTextColor(INK);t.setPadding(12,12,12,12);return t;}
  private void show(){
   ScrollView scroll=new ScrollView(this);main=new LinearLayout(this);main.setOrientation(1);main.setPadding(12,14,12,22);main.setBackgroundColor(Color.rgb(249,247,243));scroll.addView(main);setContentView(scroll);
   TextView title=text("Lazos de Luto",27);title.setTypeface(null,1);main.addView(title);
-  main.addView(text("50 diseños conmemorativos para compartir",14));
+  main.addView(text("10 diseños en 5 categorías · colección en crecimiento",14));
   LinearLayout tabs=new LinearLayout(this);main.addView(tabs);
   Button gallery=new Button(this);gallery.setText("Galería");tabs.addView(gallery,new LinearLayout.LayoutParams(0,-2,1));gallery.setOnClickListener(v->{favorites=false;render();});
   Button fav=new Button(this);fav.setText("♥ Favoritos");tabs.addView(fav,new LinearLayout.LayoutParams(0,-2,1));fav.setOnClickListener(v->{favorites=true;render();});
@@ -34,13 +35,13 @@ public class MainActivity extends Activity {
   Button phrase=new Button(this);phrase.setText("Copiar frase de condolencias");main.addView(phrase);phrase.setOnClickListener(v->{String[] lines={"Siempre en nuestros corazones.","Que su recuerdo sea una bendición.","Nuestro cariño en estos momentos difíciles.","Con respeto y afecto, nuestras condolencias."};String s=lines[new Random().nextInt(lines.length)];((android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("Condolencia",s));Toast.makeText(this,"Frase copiada",Toast.LENGTH_SHORT).show();});
   Button privacy=new Button(this);privacy.setText("Privacidad y preferencias de anuncios");main.addView(privacy);privacy.setOnClickListener(v->UserMessagingPlatform.showPrivacyOptionsForm(this,error->{if(error!=null) new AlertDialog.Builder(this).setMessage("Consulta la política de privacidad en la ficha de Google Play.").setPositiveButton("Aceptar",null).show();}));
  }
- private void render(){if(items==null)return;items.removeAllViews();int shown=0;for(int i=1;i<=50;i++){
-  if(filter!=0 && (i-1)/10!=filter-1)continue;
+ private void render(){if(items==null)return;items.removeAllViews();int shown=0;for(int i=1;i<=10;i++){
+  if(filter!=0 && (i-1)/2!=filter-1)continue;
   if(favorites&&!prefs.getBoolean("f"+i,false))continue;
   shown++;final int id=i;
   LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(8,12,8,16);items.addView(card);
   ImageView image=new ImageView(this);image.setImageBitmap(design(id,420,420));image.setScaleType(ImageView.ScaleType.FIT_CENTER);card.addView(image,new LinearLayout.LayoutParams(-1,360));
-  card.addView(text("Diseño "+id,16));
+  card.addView(text(names[id-1],16));
   LinearLayout row=new LinearLayout(this);card.addView(row);
   Button f=new Button(this);f.setText(prefs.getBoolean("f"+id,false)?"♥":"♡");row.addView(f,new LinearLayout.LayoutParams(0,-2,1));f.setOnClickListener(v->{boolean b=!prefs.getBoolean("f"+id,false);prefs.edit().putBoolean("f"+id,b).apply();if(favorites)render();else f.setText(b?"♥":"♡");});
   Button save=new Button(this);save.setText("Guardar");row.addView(save,new LinearLayout.LayoutParams(0,-2,1));save.setOnClickListener(v->save(id));
