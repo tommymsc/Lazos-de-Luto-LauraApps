@@ -1,0 +1,19 @@
+plugins { id 'com.android.application' }
+android {
+ namespace 'gratis.lazosdeluto'
+ compileSdk 36
+ defaultConfig { applicationId 'lazosdeluto.gratis'; minSdk 29; targetSdk 36; versionCode 9; versionName '2.0.0'
+  manifestPlaceholders=[ADMOB_APP_ID:'ca-app-pub-2506564165861733~5189200154']
+ }
+ buildFeatures { buildConfig true }
+ buildTypes {
+  debug { manifestPlaceholders=[ADMOB_APP_ID:'ca-app-pub-3940256099942544~3347511713']; buildConfigField 'String','BANNER_ID','"ca-app-pub-3940256099942544/6300978111"'; buildConfigField 'String','INTERSTITIAL_ID','"ca-app-pub-3940256099942544/1033173712"' }
+  release { minifyEnabled false; buildConfigField 'String','BANNER_ID','"ca-app-pub-2506564165861733/3900408409"'; buildConfigField 'String','INTERSTITIAL_ID','"ca-app-pub-2506564165861733/6482514721"' }
+ }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies {
+ implementation 'androidx.core:core:1.16.0'
+ implementation 'com.google.android.gms:play-services-ads:24.7.0'
+ implementation 'com.google.android.ump:user-messaging-platform:3.2.0'
+}
