@@ -1,18 +1,17 @@
-# Lazos de Luto — inventario de diseño
-Meta: **50 lazos en 5 categorías**, diez diseños por categoría.
+# Colección de 50 lazos — estado verificable
 
-| Categoría | Etapa local preparada | Objetivo |
-|---|---:|---:|
-| Elegantes | 6 | 10 |
-| Sobrios | 6 | 10 |
-| Florales | 6 | 10 |
-| Religiosos | 6 | 10 |
-| Modernos | 6 | 10 |
-| **Total** | **30** | **50** |
+**Preparados en el proyecto Android local:** 50 imágenes JPG distintas, desde `lazo_01.jpg` hasta `lazo_50.jpg`.
 
-La tercera tanda contiene los archivos **lazo_21.jpg** a **lazo_30.jpg**, preparados en el proyecto de trabajo local, además de los veinte anteriores. **Quedan 20 por diseñar**.
+**Distribución de la galería local:** 
+- Elegantes: 10
+- Sobrios: 10
+- Florales: 10
+- Religiosos: 10
+- Modernos: 10
 
-## Estado de integración técnica
-**Pendiente importante:** los JPG de las tandas siguen dentro del proyecto local; **no se han subido como archivos binarios a GitHub**. El proyecto actual en la rama main aún muestra dibujos generados en código en lugar de las fotografías definitivas. No contabilizar esas imágenes como incorporadas en una compilación verificada de GitHub y no anunciar cumplimiento completo.
+**Total preparados: 50/50. Faltantes por diseñar: 0.**
 
-La versión local incorpora una galería con los 30 JPG, favoritos, descarga, WhatsApp y una sección destacada. Antes de publicar, subir las imágenes binarias, sincronizar el MainActivity.java de la versión local, compilar y probar en Android.
+## ATENCIÓN: sincronización con GitHub pendiente
+La galería local está actualizada con 50 JPG y código corregido, pero **no están subidos los 50 archivos de imagen binaria al repositorio GitHub**. El `MainActivity.java` de GitHub sigue correspondiendo a la versión anterior. Antes de compilar allí, subir el contenido completo del proyecto local, incluyendo la carpeta `app/src/main/assets/lazos/` y las mipmaps del logo. No presentar la compilación actual de GitHub como colección de 50 imágenes.
+
+El proyecto local contiene la colección completa. Hay que publicar esos cambios, compilar y probar funciones en Android. No enviar a Play todavía.
