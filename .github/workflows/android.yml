@@ -1,4 +1,4 @@
-name: Build Lazos de Luto
+name: Build Lazos de Luto - 50 diseños
 
 on:
   push:
@@ -13,6 +13,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Unpack complete source if present
+        run: |
+          ZIP="Lazos-de-Luto-2.0-50-Lazos-Publicacion-Fuente-Actualizado.zip"
+          if test -f "$ZIP"; then
+            echo "Unpacking complete 50-design Android source archive"
+            unzip -o -q "$ZIP" -d .
+          else
+            echo "No complete source archive found; will validate assets."
+          fi
+          count=$(find app/src/main/assets/lazos -maxdepth 1 -name 'lazo_*.jpg' 2>/dev/null | wc -l)
+          echo "Image count: $count"
+          if [ "$count" -ne 50 ]; then
+            echo "::error::Missing actual 50 JPG assets! Upload the full source ZIP to the repository root."
+            exit 1
+          fi
+          test -s app/src/main/res/mipmap-xxxhdpi/ic_launcher.png || exit 1
+          grep -q 'versionCode 9' app/build.gradle || exit 1
+          grep -q "targetSdk 36" app/build.gradle || exit 1
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -28,19 +46,19 @@ jobs:
           test -n "$SDKMGR" || { echo "Android sdkmanager not found"; exit 1; }
           yes | "$SDKMGR" --licenses > /dev/null || true
           "$SDKMGR" --install "platforms;android-36" "build-tools;36.0.0" "platform-tools"
-      - name: Build debug APK
+      - name: Build debug APK (Google test ad IDs)
         run: gradle --no-daemon --stacktrace assembleDebug
-      - name: Upload debug APK
+      - name: Upload APK 50
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-APK
+          name: Lazos-de-Luto-2.0-APK-PRUEBA-50
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-      - name: Build release AAB (unsigned)
+      - name: Build release AAB (unsigned - not Play uploadable)
         run: gradle --no-daemon --stacktrace bundleRelease
       - name: Upload unsigned AAB
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-AAB-UNSIGNED
+          name: Lazos-de-Luto-2.0-AAB-SIN-FIRMA
           path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
