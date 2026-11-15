@@ -38,7 +38,7 @@ jobs:
         run: |
           python3 scripts/upgrade_ui.py
           python3 scripts/monetization_v22.py
-          grep -q 'showHome();initAds();' app/src/main/java/gratis/lazosdeluto/MainActivity.java
+          grep -q 'private void enterCategory' app/src/main/java/gratis/lazosdeluto/MainActivity.java
           grep -q 'versionCode 11' app/build.gradle
           grep -q "targetSdk 36" app/build.gradle
       - name: Set up JDK 17
