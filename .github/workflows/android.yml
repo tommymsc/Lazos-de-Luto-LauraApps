@@ -77,7 +77,7 @@ jobs:
           LAZOS_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEYSTORE_PASSWORD }}
           LAZOS_UPLOAD_KEY_ALIAS: ${{ secrets.LAZOS_UPLOAD_KEY_ALIAS }}
           LAZOS_UPLOAD_KEY_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEY_PASSWORD }}
-          LAZOS_ADMOB_OPEN_ID: ${{ secrets.LAZOS_ADMOB_OPEN_ID }}
+          ORG_GRADLE_PROJECT_LAZOS_ADMOB_OPEN_ID: ${{ secrets.LAZOS_ADMOB_OPEN_ID }}
         run: gradle --no-daemon --stacktrace bundleRelease
       - name: Upload signed AAB
         if: steps.signing.outputs.signed == 'true'
