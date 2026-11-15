@@ -182,3 +182,7 @@ s=s.replace('root.addView(ad);ad.loadAd','root.addView(ad);ad.loadAd')
 p.write_text(s,encoding="utf-8")
 assert 'showHome();initAds();' in s and '48 mensajes originales' in s and 'private void showDesign' in s
 print("Patched UI",len(s),"chars")
+
+# A new version code distinguishes the redesigned application from the prior test.
+gradle=Path('app/build.gradle')
+gradle.write_text(gradle.read_text().replace('versionCode 9','versionCode 10').replace("versionName '2.0.0'","versionName '2.1.0'"),encoding='utf-8')
