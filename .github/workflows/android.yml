@@ -64,9 +64,30 @@ jobs:
           name: Lazos-de-Luto-2.2-APK-PRUEBA-50
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
-      - name: Build release AAB (unsigned - not Play uploadable)
+      - name: Configure release signing (when upload key secrets are provided)
+        id: signing
+        env:
+          LAZOS_UPLOAD_KEYSTORE_BASE64: ${{ secrets.LAZOS_UPLOAD_KEYSTORE_BASE64 }}
+          LAZOS_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEYSTORE_PASSWORD }}
+          LAZOS_UPLOAD_KEY_ALIAS: ${{ secrets.LAZOS_UPLOAD_KEY_ALIAS }}
+          LAZOS_UPLOAD_KEY_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEY_PASSWORD }}
+        run: python3 scripts/configure_signing.py
+      - name: Build release AAB
+        env:
+          LAZOS_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEYSTORE_PASSWORD }}
+          LAZOS_UPLOAD_KEY_ALIAS: ${{ secrets.LAZOS_UPLOAD_KEY_ALIAS }}
+          LAZOS_UPLOAD_KEY_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEY_PASSWORD }}
+          LAZOS_ADMOB_OPEN_ID: ${{ secrets.LAZOS_ADMOB_OPEN_ID }}
         run: gradle --no-daemon --stacktrace bundleRelease
-      - name: Upload unsigned AAB
+      - name: Upload signed AAB
+        if: steps.signing.outputs.signed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lazos-de-Luto-2.2-AAB-FIRMADO
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+      - name: Upload unsigned AAB (not Play uploadable)
+        if: steps.signing.outputs.signed != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: Lazos-de-Luto-2.2-AAB-SIN-FIRMA
