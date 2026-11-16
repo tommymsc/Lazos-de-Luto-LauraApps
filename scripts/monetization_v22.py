@@ -137,7 +137,7 @@ b=build.read_text(encoding="utf-8")
 assert "INTERSTITIAL_ID" in b and "versionCode 10" in b
 b=b.replace("versionCode 10","versionCode 11").replace("versionName '2.1.0'","versionName '2.2.0'")
 b=b.replace("  debug { manifestPlaceholders.ADMOB_APP_ID",'''  debug { buildConfigField 'String','APP_OPEN_ID','"ca-app-pub-3940256099942544/9257395921"'; manifestPlaceholders.ADMOB_APP_ID''')
-b=b.replace("  release { minifyEnabled false;",'''  release { buildConfigField 'String','APP_OPEN_ID', '"' + ((project.findProperty('LAZOS_ADMOB_OPEN_ID') ?: '').toString().matches('ca-app-pub-[0-9]{16}/[0-9]{10}') ? (project.findProperty('LAZOS_ADMOB_OPEN_ID') ?: '').toString() : '') + '"'; minifyEnabled false;''')
-# Note: opening unit must be created in AdMob. Empty ID disables production app-open, without crashing.
+b=b.replace("  release { minifyEnabled false;",'''  release { buildConfigField 'String','APP_OPEN_ID', '"' + ((project.findProperty('LAZOS_ADMOB_OPEN_ID') ?: 'ca-app-pub-2506564165861733/9553696934').toString().matches('ca-app-pub-[0-9]{16}/[0-9]{10}') ? (project.findProperty('LAZOS_ADMOB_OPEN_ID') ?: 'ca-app-pub-2506564165861733/9553696934').toString() : '') + '"'; minifyEnabled false;''')
+# Production defaults to the confirmed App Open ad unit; Gradle property can override it.
 build.write_text(b,encoding="utf-8")
-print('Configured v2.2.0 (11) AdMob ads. AppOpen release requires LAZOS_ADMOB_OPEN_ID.')
+print('Configured v2.2.0 (11) AdMob ads; production App Open ID ready.')
