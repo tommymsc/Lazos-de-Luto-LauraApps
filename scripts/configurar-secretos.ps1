@@ -30,8 +30,12 @@ try {
   # Verificar que el PEM registrado en Play corresponde exactamente al par de claves local.
   $temp = Join-Path $env:TEMP ("lazos-cert-" + [guid]::NewGuid().ToString() + ".pem")
   try {
-    & keytool -exportcert -rfc -keystore $keystore -alias upload -storepass:env LAZOS_KEYSTORE_CHECK_PASSWORD -file $temp 2>$null | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "No se pudo exportar el certificado de verificación." }
+    # En PowerShell 5.1, el aviso normal de keytool en stderr puede activar ErrorActionPreference=Stop.
+    # Lanzar keytool como proceso externo evita el falso error sin mostrar la contraseña.
+    $arguments = @('-exportcert','-rfc','-keystore',('"' + $keystore + '"'),'-alias','upload','-storepass:env','LAZOS_KEYSTORE_CHECK_PASSWORD','-file',('"' + $temp + '"'))
+    $process = Start-Process -FilePath 'keytool.exe' -ArgumentList $arguments -Wait -PassThru -WindowStyle Hidden
+    $exitCode = $process.ExitCode
+    if ($exitCode -ne 0) { throw "No se pudo exportar el certificado de verificación." }
     # Comparar los bloques PEM certificados, ignorando saltos de línea.
     $aText = (Get-Content $temp -Raw) -replace '\s', ''
     $bText = (Get-Content $certificate -Raw) -replace '\s', ''
