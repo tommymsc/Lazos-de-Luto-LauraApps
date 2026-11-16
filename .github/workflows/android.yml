@@ -4,6 +4,12 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      google_upload_key_reset_approved:
+        description: "Google Play approved the upload-key reset and the five signing secrets are configured"
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   android:
@@ -67,10 +73,11 @@ jobs:
       - name: Configure release signing (when upload key secrets are provided)
         id: signing
         env:
-          LAZOS_UPLOAD_KEYSTORE_BASE64: ${{ secrets.LAZOS_UPLOAD_KEYSTORE_BASE64 }}
-          LAZOS_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEYSTORE_PASSWORD }}
-          LAZOS_UPLOAD_KEY_ALIAS: ${{ secrets.LAZOS_UPLOAD_KEY_ALIAS }}
-          LAZOS_UPLOAD_KEY_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEY_PASSWORD }}
+          LAZOS_UPLOAD_KEYSTORE_BASE64: ${{ github.event_name == 'workflow_dispatch' && inputs.google_upload_key_reset_approved && secrets.LAZOS_UPLOAD_KEYSTORE_BASE64 || '' }}
+          LAZOS_UPLOAD_KEYSTORE_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && inputs.google_upload_key_reset_approved && secrets.LAZOS_UPLOAD_KEYSTORE_PASSWORD || '' }}
+          LAZOS_UPLOAD_KEY_ALIAS: ${{ github.event_name == 'workflow_dispatch' && inputs.google_upload_key_reset_approved && secrets.LAZOS_UPLOAD_KEY_ALIAS || '' }}
+          LAZOS_UPLOAD_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && inputs.google_upload_key_reset_approved && secrets.LAZOS_UPLOAD_KEY_PASSWORD || '' }}
+          LAZOS_UPLOAD_CERT_PEM_BASE64: ${{ github.event_name == 'workflow_dispatch' && inputs.google_upload_key_reset_approved && secrets.LAZOS_UPLOAD_CERT_PEM_BASE64 || '' }}
         run: python3 scripts/configure_signing.py
       - name: Build release AAB
         env:
@@ -78,6 +85,13 @@ jobs:
           LAZOS_UPLOAD_KEY_ALIAS: ${{ secrets.LAZOS_UPLOAD_KEY_ALIAS }}
           LAZOS_UPLOAD_KEY_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEY_PASSWORD }}
         run: gradle --no-daemon --stacktrace bundleRelease
+      - name: Inspect release AAB content
+        run: python3 scripts/verify_bundle.py
+      - name: Verify signed AAB jar signature
+        if: steps.signing.outputs.signed == 'true'
+        run: |
+          jarsigner -verify -verbose app/build/outputs/bundle/release/app-release.aab | tail -n 25
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab 2>&1 | grep -q 'jar verified'
       - name: Upload signed AAB
         if: steps.signing.outputs.signed == 'true'
         uses: actions/upload-artifact@v4
