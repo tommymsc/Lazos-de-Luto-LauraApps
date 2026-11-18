@@ -9,9 +9,9 @@ s=s.replace("minSdk 24","minSdk 19").replace("versionCode 13","versionCode 16").
 s=re.sub(r"androidx\.core:core:[0-9.]+", "androidx.core:core:1.12.0", s)
 s=re.sub(r"play-services-ads:[0-9.]+", "play-services-ads:22.6.0", s)
 s=re.sub(r"user-messaging-platform:[0-9.]+", "user-messaging-platform:2.2.0", s)
-assert "user-messaging-platform:3.2.0" in s and "play-services-ads:24.7.0" in s
+assert "user-messaging-platform:2.2.0" in s and "play-services-ads:22.6.0" in s
 s=s.replace("defaultConfig {", "defaultConfig { multiDexEnabled true; ",1)
-s=s.replace("dependencies {", "dependencies {\\n implementation 'androidx.multidex:multidex:2.0.1'",1)
+s=s.replace("dependencies {", "dependencies {\n implementation 'androidx.multidex:multidex:2.0.1'",1)
 p.write_text(s)
 source=Path("app/src/main/java/gratis/lazosdeluto/MainActivity.java")
 j=source.read_text(encoding="utf-8")
