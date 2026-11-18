@@ -1,5 +1,3 @@
-# Lazos de Luto 2.2.1
+# Lazos de Luto 2.2.1 (versionCode 12)
 
-This release uses versionCode 12, minSdk 23, targetSdk 36, the original 50 distinct images, and Android 6–9 gallery saving through the legacy WRITE_EXTERNAL_STORAGE runtime permission (maxSdkVersion 28). Android 10+ continues using scoped MediaStore.
-
-Release signing is enabled only by the exact authorized commit message or the explicitly approved manual workflow dispatch. The private upload key remains exclusively in GitHub Actions Secrets.
+Minimum SDK API 24 (Android 7), required by Google Mobile Ads 25.5.0; target SDK API 36. Android 7–9 saves photos through legacy permission and media scanning; Android 10+ uses scoped MediaStore. Includes the original 50 images and existing 48 messages. Signing is performed only with the repository's encrypted GitHub Actions secrets.
