@@ -5,7 +5,7 @@ import re
 p=Path("app/build.gradle")
 s=p.read_text()
 assert "minSdk 24" in s and "versionCode 13" in s and "versionName '2.2.2'" in s
-s=s.replace("minSdk 24","minSdk 19").replace("versionCode 13","versionCode 16").replace("versionName '2.2.2'","versionName '2.2.5'")
+s=s.replace("minSdk 24","minSdk 19").replace("versionCode 13","versionCode 17").replace("versionName '2.2.2'","versionName '2.2.6'")
 s=re.sub(r"androidx\.core:core:[0-9.]+", "androidx.core:core:1.12.0", s)
 s=re.sub(r"play-services-ads:[0-9.]+", "play-services-ads:22.6.0", s)
 s=re.sub(r"user-messaging-platform:[0-9.]+", "user-messaging-platform:2.2.0", s)
@@ -34,8 +34,29 @@ for permission in ("ACCESS_COARSE_LOCATION","ACCESS_FINE_LOCATION","ACCESS_BACKG
     declaration='<uses-permission android:name="android.permission.'+permission+'" tools:node="remove"/>'
     if declaration not in xml:
         xml=xml.replace('<application ',declaration+'<application ',1)
+# The app works with basic click/D-pad navigation and does not need
+# hardware normally absent on TVs or certain tablets.
+optional_features=(
+    "android.hardware.touchscreen",
+    "android.hardware.faketouch",
+    "android.hardware.telephony",
+    "android.hardware.camera",
+    "android.hardware.camera.autofocus",
+    "android.hardware.microphone",
+    "android.hardware.location",
+    "android.hardware.location.gps",
+    "android.hardware.location.network",
+    "android.hardware.nfc",
+    "android.hardware.sensor.accelerometer",
+    "android.hardware.screen.portrait",
+    "android.software.leanback",
+)
+for feature in optional_features:
+    declaration='<uses-feature android:name="'+feature+'" android:required="false"/>'
+    if declaration not in xml:
+        xml=xml.replace('<application ',declaration+'<application ',1)
 manifest.write_text(xml,encoding="utf-8")
 assert all('tools:node="remove"' in xml for _ in [0])
 print("Privacy guard enabled: location permissions are excluded from merged manifest.")
 
-print("Android 4.4+ configuration: minSdk19, targetSdk36, versionCode16, GMA22.6.0 (sunset)")
+print("Android 4.4+ configuration: minSdk19, targetSdk36, versionCode17, GMA22.6.0 (sunset)")
