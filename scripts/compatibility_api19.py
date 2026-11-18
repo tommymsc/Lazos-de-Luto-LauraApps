@@ -32,4 +32,20 @@ repl="""  if(Build.VERSION.SDK_INT<29){
 assert needle in s
 s=s.replace(needle,repl)
 p.write_text(s)
+
+# Privacy safeguard: reject location permissions contributed by any dependency,
+# including future versions of Google Mobile Ads. This app has no location feature.
+manifest=Path("app/src/main/AndroidManifest.xml")
+xml=manifest.read_text(encoding="utf-8")
+if 'xmlns:tools=' not in xml:
+    xml=xml.replace('<manifest xmlns:android="http://schemas.android.com/apk/res/android">',
+        '<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">',1)
+for permission in ("ACCESS_COARSE_LOCATION","ACCESS_FINE_LOCATION","ACCESS_BACKGROUND_LOCATION"):
+    declaration='<uses-permission android:name="android.permission.'+permission+'" tools:node="remove"/>'
+    if declaration not in xml:
+        xml=xml.replace('<application ',declaration+'<application ',1)
+manifest.write_text(xml,encoding="utf-8")
+assert all('tools:node="remove"' in xml for _ in [0])
+print("Privacy guard enabled: location permissions are excluded from merged manifest.")
+
 print("Android 4.4+ configuration: minSdk19, targetSdk36, versionCode14")
