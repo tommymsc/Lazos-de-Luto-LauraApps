@@ -4,7 +4,7 @@ from pathlib import Path
 build=Path("app/build.gradle")
 s=build.read_text()
 assert "minSdk 29" in s and "versionCode 11" in s
-s=s.replace("minSdk 29","minSdk 24").replace("versionCode 11","versionCode 12").replace("versionName '2.2.0'","versionName '2.2.1'")
+s=s.replace("minSdk 29","minSdk 24").replace("versionCode 11","versionCode 13").replace("versionName '2.2.0'","versionName '2.2.2'")
 build.write_text(s)
 manifest=Path("app/src/main/AndroidManifest.xml")
 m=manifest.read_text()
@@ -51,4 +51,4 @@ j=j.replace(" private void save(int i){",''' private static final int LEGACY_STO
    saveLegacy(i);return;
   }''',1)
 p.write_text(j)
-print("Compat API24/versionCode12 applied; API24-28 save uses runtime permission and media scan")
+print("Compat API24/versionCode13 applied; API24-28 save uses runtime permission and media scan")
