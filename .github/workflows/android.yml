@@ -85,6 +85,7 @@ jobs:
           grep -q 'targetSdk 36' app/build.gradle
           grep -q 'versionCode 16' app/build.gradle
           grep -q 'androidx.multidex:multidex:2.0.1' app/build.gradle
+          grep -q "versionName '2.2.5'" app/build.gradle
           grep -q 'Build.VERSION.SDK_INT>=23' app/src/main/java/gratis/lazosdeluto/MainActivity.java
       - name: Build debug APK (Google test ad IDs)
         run: gradle --no-daemon --stacktrace assembleDebug
