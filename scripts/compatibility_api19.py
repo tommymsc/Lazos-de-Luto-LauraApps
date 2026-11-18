@@ -13,10 +13,18 @@ s=re.sub(r"androidx\.core:core:[0-9.]+", "androidx.core:core:1.12.0", s)
 s=re.sub(r"play-services-ads:[0-9.]+", "play-services-ads:22.6.0", s)
 s=re.sub(r"user-messaging-platform:[0-9.]+", "user-messaging-platform:2.2.0", s)
 assert "user-messaging-platform:2.2.0" in s and "play-services-ads:22.6.0" in s
+s=s.replace("defaultConfig {", "defaultConfig { multiDexEnabled true; ",1)
+s=s.replace("dependencies {", "dependencies {\\n implementation 'androidx.multidex:multidex:2.0.1'",1)
 p.write_text(s)
 p=Path("app/src/main/java/gratis/lazosdeluto/MainActivity.java")
 s=p.read_text()
 assert "if(Build.VERSION.SDK_INT<29){" in s
+assert "public class MainActivity extends Activity {" in s
+s=s.replace("public class MainActivity extends Activity {", """public class MainActivity extends Activity {
+ @Override protected void attachBaseContext(Context base){
+  super.attachBaseContext(base);
+  androidx.multidex.MultiDex.install(this);
+ }""",1)
 needle="""  if(Build.VERSION.SDK_INT<29){
    if(checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)!=android.content.pm.PackageManager.PERMISSION_GRANTED){"""
 repl="""  if(Build.VERSION.SDK_INT<29){
