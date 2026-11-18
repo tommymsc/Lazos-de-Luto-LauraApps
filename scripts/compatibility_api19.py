@@ -14,7 +14,7 @@ s=re.sub(r"play-services-ads:[0-9.]+", "play-services-ads:22.6.0", s)
 s=re.sub(r"user-messaging-platform:[0-9.]+", "user-messaging-platform:2.2.0", s)
 assert "user-messaging-platform:2.2.0" in s and "play-services-ads:22.6.0" in s
 s=s.replace("defaultConfig {", "defaultConfig { multiDexEnabled true; ",1)
-s=s.replace("dependencies {", "dependencies {\\n implementation 'androidx.multidex:multidex:2.0.1'",1)
+s=s.replace("dependencies {", "dependencies {\n implementation 'androidx.multidex:multidex:2.0.1'",1)
 p.write_text(s)
 p=Path("app/src/main/java/gratis/lazosdeluto/MainActivity.java")
 s=p.read_text()
