@@ -5,12 +5,12 @@ Runs only AFTER v2.2.9 SDK script. Does not touch ad IDs, SDK floors, or app beh
 from pathlib import Path
 p=Path("app/build.gradle")
 s=p.read_text(encoding="utf-8")
-assert s.count("release { minifyEnabled false;")==1
+assert s.count("minifyEnabled false;")==1
 assert s.count("versionCode 20")==1
 assert s.count("versionName '2.2.9'")==1
 assert "minSdk 23" in s and "targetSdk 36" in s
-s=s.replace("release { minifyEnabled false;",
- """release { minifyEnabled true; shrinkResources true;
+s=s.replace("minifyEnabled false;",
+ """minifyEnabled true; shrinkResources true;
    proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro';""",1)
 s=s.replace("versionCode 20","versionCode 21",1).replace("versionName '2.2.9'","versionName '2.3.0'",1)
 # Constraints only select the version if some dependency actually pulls in Fragment.
