@@ -16,6 +16,7 @@ change("private int previousCategory=0;",
 """private int previousCategory=0;
  private boolean interstitialLoading=false;
  private int interstitialLoadFailures=0;
+ private long nextInterstitialRetryAt=0L;
  private long interstitialLoadedAt=0L;
  private static final long INTERSTITIAL_EXPIRY_MS=3600000L;""","interstitial state")
 change("  if(transition && interstitial!=null && !fullScreenActive && !isFinishing()",
@@ -42,13 +43,15 @@ old=''' private void loadInterstitial(){
  }'''
 new=''' private void loadInterstitial(){
   if(BuildConfig.INTERSTITIAL_ID.isEmpty() || isFinishing() || isDestroyed()
-      || interstitialLoading || interstitial!=null || fullScreenActive)return;
+      || interstitialLoading || interstitial!=null || fullScreenActive
+      || android.os.SystemClock.elapsedRealtime()<nextInterstitialRetryAt)return;
   interstitialLoading=true;
   InterstitialAd.load(this,BuildConfig.INTERSTITIAL_ID,new AdRequest.Builder().build(),
    new InterstitialAdLoadCallback(){
     @Override public void onAdLoaded(InterstitialAd loadedAd){
      interstitialLoading=false;
      interstitialLoadFailures=0;
+     nextInterstitialRetryAt=0L;
      interstitialLoadedAt=android.os.SystemClock.elapsedRealtime();
      interstitial=loadedAd;
      android.util.Log.d("LazosAds","Interstitial cached for a future category transition");
@@ -59,6 +62,7 @@ new=''' private void loadInterstitial(){
      interstitialLoadedAt=0L;
      interstitialLoadFailures=Math.min(5,interstitialLoadFailures+1);
      final long delayMs=Math.min(180000L,15000L*(1L<<Math.min(interstitialLoadFailures-1,4)));
+     nextInterstitialRetryAt=android.os.SystemClock.elapsedRealtime()+delayMs;
      android.util.Log.w("LazosAds","Interstitial load failed, code="+error.getCode()+", retry in ms="+delayMs);
      // Avoid rapid no-fill polling; never interrupt content to display a late ad.
      mainHandler.postDelayed(()->loadInterstitial(),delayMs);
@@ -66,10 +70,6 @@ new=''' private void loadInterstitial(){
    });
  }'''
 change(old,new,"interstitial loader")
-# After an App Open was dismissed, the interstitial should be available for category changes.
-change("private void finishOpeningScreen(){\n  if(!openingScreen)return;",
-       "private void finishOpeningScreen(){\n  if(!openingScreen)return;",
-       "startup finish shape")
 p.write_text(s,encoding="utf-8")
 gpath=Path("app/build.gradle")
 g=gpath.read_text()
