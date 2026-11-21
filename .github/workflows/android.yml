@@ -57,6 +57,12 @@ jobs:
           python3 scripts/compatibility_api19.py
           grep -q 'minSdk 19' app/build.gradle
           grep -q 'versionCode 17' app/build.gradle
+      - name: Fix App Open start lifecycle and bump to version 2.2.7
+        run: |
+          python3 scripts/monetization_v227.py
+          grep -q 'versionCode 18' app/build.gradle
+          grep -q "versionName '2.2.7'" app/build.gradle
+          grep -q 'minSdk 19' app/build.gradle
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -83,9 +89,9 @@ jobs:
         run: |
           grep -q 'minSdk 19' app/build.gradle
           grep -q 'targetSdk 36' app/build.gradle
-          grep -q 'versionCode 17' app/build.gradle
+          grep -q 'versionCode 18' app/build.gradle
           grep -q 'androidx.multidex:multidex:2.0.1' app/build.gradle
-          grep -q "versionName '2.2.6'" app/build.gradle
+          grep -q "versionName '2.2.7'" app/build.gradle
           grep -q 'android.hardware.touchscreen.*required="false"' app/src/main/AndroidManifest.xml
           grep -q 'android.hardware.faketouch.*required="false"' app/src/main/AndroidManifest.xml
           grep -q 'android.hardware.screen.portrait.*required="false"' app/src/main/AndroidManifest.xml
@@ -124,7 +130,7 @@ jobs:
         if: steps.signing.outputs.signed == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-2.2.6-CODIGO17-AAB-FIRMADO
+          name: Lazos-de-Luto-2.2.7-CODIGO18-AAB-FIRMADO
           path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
       - name: Upload unsigned AAB (not Play uploadable)
