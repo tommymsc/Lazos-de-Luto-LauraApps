@@ -86,9 +86,14 @@ else:
     s = s.replace(" buildTypes {", signing + "\n buildTypes {", 1)
     # An optimized release starts with minifyEnabled, not buildConfigField.
     # Match only the release block header and retain the R8 configuration.
-    s, count = re.subn(r"(?m)^([ ]*release[ ]*[{])", lambda m: m.group(1) + " signingConfig signingConfigs.release;", s, count=1)
+    before_build_types, build_types = s.split(" buildTypes {", 1)
+    build_types, count = re.subn(
+        r"(?m)^([ ]*release[ ]*[{])",
+        lambda m: m.group(1) + " signingConfig signingConfigs.release;",
+        build_types, count=1)
     if count != 1:
-        raise SystemExit("Release block not found exactly once; refusing to sign.")
+        raise SystemExit("BuildTypes release block not found exactly once; refusing to sign.")
+    s = before_build_types + " buildTypes {" + build_types
     build.write_text(s, encoding="utf-8")
     set_signed(True)
     print("Release signing enabled without storing the private key in Git.")
