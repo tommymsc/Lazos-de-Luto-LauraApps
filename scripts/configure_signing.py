@@ -5,6 +5,7 @@ No keystore, password, or PEM is printed or added to Git.
 import base64
 import hashlib
 import os
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -80,10 +81,14 @@ else:
   }
  }
  """
-    if " buildTypes {" not in s or "  release { buildConfigField" not in s:
+    if " buildTypes {" not in s:
         raise SystemExit("Unsupported Gradle build file; refusing to sign.")
     s = s.replace(" buildTypes {", signing + "\n buildTypes {", 1)
-    s = s.replace("  release { buildConfigField", "  release { signingConfig signingConfigs.release; buildConfigField", 1)
+    # An optimized release starts with minifyEnabled, not buildConfigField.
+    # Match only the release block header and retain the R8 configuration.
+    s, count = re.subn(r"(?m)^(\\s*release\\s*\\{)", r"\\1 signingConfig signingConfigs.release;", s, count=1)
+    if count != 1:
+        raise SystemExit("Release block not found exactly once; refusing to sign.")
     build.write_text(s, encoding="utf-8")
     set_signed(True)
     print("Release signing enabled without storing the private key in Git.")
