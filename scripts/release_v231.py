@@ -11,7 +11,7 @@ if s.count("versionCode 21") != 1 or s.count("versionName '2.3.0'") != 1:
 s = s.replace("versionCode 21", "versionCode 22", 1).replace("versionName '2.3.0'", "versionName '2.3.1'", 1)
 # The constraint is already inserted by optimize_release_v230.py.
 # Preserve its conditional nature (no Fragment dependency is added unnecessarily).
-old = "implementation('androidx.fragment:fragment:1.9.1')"
+old = "implementation('androidx.fragment:fragment:1.9.1') {"
 new = """implementation('androidx.fragment:fragment') {
    version { strictly '1.9.1' }"""
 # Strict constraint may reject a dependency that requires another version:
