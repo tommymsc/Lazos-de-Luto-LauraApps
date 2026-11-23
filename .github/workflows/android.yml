@@ -118,7 +118,16 @@ jobs:
           grep -q 'Build.VERSION.SDK_INT>=23' app/src/main/java/gratis/lazosdeluto/MainActivity.java
       - name: Inspect resolved Fragment dependency in release
         run: |
-          gradle --no-daemon :app:dependencyInsight --configuration releaseRuntimeClasspath --dependency androidx.fragment:fragment
+          set -o pipefail
+          gradle --no-daemon :app:dependencyInsight --configuration releaseRuntimeClasspath --dependency androidx.fragment:fragment | tee fragment-release-dependency-report.txt
+          python3 scripts/check_fragment_release.py fragment-release-dependency-report.txt
+      - name: Upload Fragment dependency audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lazos-Fragment-Dependency-Audit
+          path: fragment-release-dependency-report.txt
+          if-no-files-found: warn
       - name: Build debug APK (Google test ad IDs)
         run: gradle --no-daemon --stacktrace assembleDebug
       - name: Upload APK 50
