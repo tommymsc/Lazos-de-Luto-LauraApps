@@ -32,8 +32,8 @@ for line in report.splitlines():
 
 if not versions:
     print("INDETERMINADO: Gradle no mostró un encabezado de Fragment interpretable.")
-    print("Inspeccionar el artefacto Lazos-Fragment-Dependency-Audit antes de publicar.")
-    sys.exit(0)
+    print("ERROR: No se puede confirmar la dependencia; se detiene el build.")
+    sys.exit(1)
 
 if "1.0.0" in versions:
     sys.exit("ERROR: Fragment 1.0.0 parece seguir seleccionado en releaseRuntimeClasspath.")
