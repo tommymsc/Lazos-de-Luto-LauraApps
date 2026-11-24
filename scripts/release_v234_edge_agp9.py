@@ -40,6 +40,15 @@ for disallowed in ("WindowCompat.enableEdgeToEdge(", "setStatusBarColor(",
     assert disallowed not in code, disallowed
 src.write_text(s,encoding="utf-8")
 
+# The legacy source ZIP is unpacked at the beginning of CI and can replace
+# the top-level build.gradle. Enforce AGP 9 after the unpacking step.
+root_gradle=Path("build.gradle")
+root_content=root_gradle.read_text(encoding="utf-8")
+if "version '8.11.1'" in root_content:
+    root_content=root_content.replace("version '8.11.1'","version '9.0.1'",1)
+assert "version '9.0.1'" in root_content, "AGP 9.0.1 missing after ZIP unpack"
+root_gradle.write_text(root_content,encoding="utf-8")
+
 gradle=Path("app/build.gradle")
 g=gradle.read_text(encoding="utf-8")
 assert g.count("versionCode 24")==1 and g.count("versionName '2.3.3'")==1
