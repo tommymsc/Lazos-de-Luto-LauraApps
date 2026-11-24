@@ -118,7 +118,7 @@ jobs:
           grep -q 'versionCode 25' app/build.gradle
           grep -q "versionName '2.3.4'" app/build.gradle
           grep -q 'LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS' app/src/main/java/gratis/lazosdeluto/MainActivity.java
-          ! grep -q 'WindowCompat.enableEdgeToEdge(getWindow())' app/src/main/java/gratis/lazosdeluto/MainActivity.java
+          ! grep -Eq '^[[:space:]]*androidx[.]core[.]view[.]WindowCompat[.]enableEdgeToEdge' app/src/main/java/gratis/lazosdeluto/MainActivity.java
           grep -q "version '9.0.1'" build.gradle
           grep -q 'shrinkResources true' app/build.gradle
       - name: Set up JDK 17
