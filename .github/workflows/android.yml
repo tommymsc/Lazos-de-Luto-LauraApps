@@ -126,6 +126,11 @@ jobs:
           python3 scripts/release_v235_ads.py
           grep -q 'versionCode 26' app/build.gradle
           grep -q 'adsUsable()' app/src/main/java/gratis/lazosdeluto/MainActivity.java
+      - name: Apply 2.3.6 startup hotfix
+        run: |
+          python3 scripts/release_v236_startup.py
+          grep -q 'versionCode 27' app/build.gradle
+          grep -q 'minifyEnabled false; shrinkResources false;' app/build.gradle
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -143,8 +148,8 @@ jobs:
           "$SDKMGR" --install "platforms;android-36" "build-tools;36.0.0" "platform-tools"
       - name: Verify privacy and supported SDK versions
         run: |
-          grep -q 'play-services-ads:24.7.0' app/build.gradle
-          grep -q 'user-messaging-platform:3.2.0' app/build.gradle
+          grep -q 'play-services-ads:25.4.0' app/build.gradle
+          grep -q 'user-messaging-platform:4.0.0' app/build.gradle
           grep -q 'targetSdk 36' app/build.gradle
           grep -q 'ACCESS_COARSE_LOCATION.*tools:node="remove"' app/src/main/AndroidManifest.xml
           grep -q 'ACCESS_FINE_LOCATION.*tools:node="remove"' app/src/main/AndroidManifest.xml
@@ -152,9 +157,9 @@ jobs:
         run: |
           grep -q 'minSdk 23' app/build.gradle
           grep -q 'targetSdk 36' app/build.gradle
-          grep -q 'versionCode 26' app/build.gradle
-          grep -q 'androidx.multidex:multidex:2.0.1' app/build.gradle
-          grep -q "versionName '2.3.5'" app/build.gradle
+          grep -q 'versionCode 27' app/build.gradle
+          grep -q 'androidx.startup:startup-runtime:1.2.0' app/build.gradle
+          grep -q "versionName '2.3.6'" app/build.gradle
           grep -q 'android.hardware.touchscreen.*required="false"' app/src/main/AndroidManifest.xml
           grep -q 'android.hardware.faketouch.*required="false"' app/src/main/AndroidManifest.xml
           grep -q 'android.hardware.screen.portrait.*required="false"' app/src/main/AndroidManifest.xml
@@ -176,7 +181,7 @@ jobs:
       - name: Upload APK 50
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-2.3.5-CODIGO26-APK-PRUEBA-50
+          name: Lazos-de-Luto-2.3.6-CODIGO27-APK-PRUEBA-50
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
       - name: Configure release signing (when upload key secrets are provided)
@@ -193,19 +198,31 @@ jobs:
           LAZOS_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEYSTORE_PASSWORD }}
           LAZOS_UPLOAD_KEY_ALIAS: ${{ secrets.LAZOS_UPLOAD_KEY_ALIAS }}
           LAZOS_UPLOAD_KEY_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEY_PASSWORD }}
-        run: gradle --no-daemon --stacktrace bundleRelease
-      - name: Verify R8 output files exist
+        run: gradle --no-daemon --stacktrace bundleRelease assembleRelease
+      - name: Enable KVM group permissions
         run: |
-          test -s app/build/outputs/mapping/release/mapping.txt
-          test -s app/build/outputs/mapping/release/usage.txt
-      - name: Inspect release AAB content
-        run: python3 scripts/verify_bundle.py
-      - name: Upload R8 mapping for deobfuscation
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Release APK startup smoke test Android 15
+        if: steps.signing.outputs.signed == 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: bash scripts/smoke_startup_release.sh
+      - name: Preserve startup diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-2.3.5-CODIGO26-R8-MAPPING
-          path: app/build/outputs/mapping/release/mapping.txt
-          if-no-files-found: error
+          name: Lazos-2.3.6-CODIGO27-startup-smoke
+          path: startup-smoke/
+          if-no-files-found: warn
+      - name: Inspect release AAB content
+        run: python3 scripts/verify_bundle.py
       - name: Verify signed AAB jar signature
         if: steps.signing.outputs.signed == 'true'
         run: |
@@ -215,13 +232,13 @@ jobs:
         if: steps.signing.outputs.signed == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-2.3.5-CODIGO26-AAB-FIRMADO
+          name: Lazos-de-Luto-2.3.6-CODIGO27-AAB-FIRMADO
           path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
       - name: Upload unsigned AAB (not Play uploadable)
         if: steps.signing.outputs.signed != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-2.3.5-CODIGO26-AAB-SIN-FIRMA
+          name: Lazos-de-Luto-2.3.6-CODIGO27-AAB-SIN-FIRMA
           path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
