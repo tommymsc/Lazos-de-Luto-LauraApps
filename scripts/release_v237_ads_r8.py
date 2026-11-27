@@ -115,7 +115,17 @@ g=g.replace("versionCode 27","versionCode 28",1).replace("versionName '2.3.6'","
 g=g.replace("minifyEnabled false; shrinkResources false;","minifyEnabled true; shrinkResources true;",1)
 gpath.write_text(g,encoding="utf-8")
 rules=Path("app/proguard-rules.pro")
-rules.write_text(rules.read_text(encoding="utf-8")+"\n# Conservative R8: retain obfuscation and shrinking, avoid optimizer rewrites.\n-dontoptimize\n",encoding="utf-8")
+rules.write_text(rules.read_text(encoding="utf-8")+"""
+# Conservative R8: retain obfuscation and shrinking, avoid optimizer rewrites.
+-dontoptimize
+# WorkManager uses Room's generated database implementation via reflection.
+# Preserve the names and constructors of the database pair and Room subclasses.
+-keep class androidx.work.impl.WorkDatabase { *; }
+-keep class androidx.work.impl.WorkDatabase_Impl { *; }
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep class androidx.work.WorkManagerInitializer { *; }
+-keep class * implements androidx.startup.Initializer { public <init>(); }
+""",encoding="utf-8")
 assert "minSdk 23" in g and "targetSdk 36" in g
 assert "getCurrentOrientationAnchoredAdaptiveBannerAdSize" in s
 assert "interstitialOpportunity()" in s

@@ -14,8 +14,12 @@ for n in 1 2 3; do
   sleep 12
   adb logcat -d -b crash > "startup-smoke/crash-$n.txt"
   adb logcat -d -s LazosAds:D AndroidRuntime:E > "startup-smoke/ads-$n.txt"
-  adb shell pidof "$pkg" | tee "startup-smoke/pid-$n.txt"
-  test -s "startup-smoke/pid-$n.txt"
+  adb shell pidof "$pkg" > "startup-smoke/pid-$n.txt" || true
+  if ! test -s "startup-smoke/pid-$n.txt"; then
+    cat "startup-smoke/crash-$n.txt" "startup-smoke/ads-$n.txt"
+    echo "Application process died during launch $n"
+    exit 1
+  fi
   if grep -Fq "$pkg" "startup-smoke/crash-$n.txt"; then
     cat "startup-smoke/crash-$n.txt"
     exit 1
