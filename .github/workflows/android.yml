@@ -131,6 +131,12 @@ jobs:
           python3 scripts/release_v236_startup.py
           grep -q 'versionCode 27' app/build.gradle
           grep -q 'minifyEnabled false; shrinkResources false;' app/build.gradle
+      - name: Apply 2.3.7 ad efficiency and conservative R8
+        run: |
+          python3 scripts/release_v237_ads_r8.py
+          grep -q 'versionCode 28' app/build.gradle
+          grep -q 'minifyEnabled true; shrinkResources true;' app/build.gradle
+          grep -q 'getCurrentOrientationAnchoredAdaptiveBannerAdSize' app/src/main/java/gratis/lazosdeluto/MainActivity.java
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -157,9 +163,9 @@ jobs:
         run: |
           grep -q 'minSdk 23' app/build.gradle
           grep -q 'targetSdk 36' app/build.gradle
-          grep -q 'versionCode 27' app/build.gradle
+          grep -q 'versionCode 28' app/build.gradle
           grep -q 'androidx.startup:startup-runtime:1.2.0' app/build.gradle
-          grep -q "versionName '2.3.6'" app/build.gradle
+          grep -q "versionName '2.3.7'" app/build.gradle
           grep -q 'android.hardware.touchscreen.*required="false"' app/src/main/AndroidManifest.xml
           grep -q 'android.hardware.faketouch.*required="false"' app/src/main/AndroidManifest.xml
           grep -q 'android.hardware.screen.portrait.*required="false"' app/src/main/AndroidManifest.xml
@@ -181,7 +187,7 @@ jobs:
       - name: Upload APK 50
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-2.3.6-CODIGO27-APK-PRUEBA-50
+          name: Lazos-de-Luto-2.3.7-CODIGO28-APK-PRUEBA-50
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
       - name: Configure release signing (when upload key secrets are provided)
@@ -199,6 +205,59 @@ jobs:
           LAZOS_UPLOAD_KEY_ALIAS: ${{ secrets.LAZOS_UPLOAD_KEY_ALIAS }}
           LAZOS_UPLOAD_KEY_PASSWORD: ${{ secrets.LAZOS_UPLOAD_KEY_PASSWORD }}
         run: gradle --no-daemon --stacktrace bundleRelease assembleRelease
+      - name: Verify R8 mapping and actual obfuscation
+        run: |
+          test -s app/build/outputs/mapping/release/mapping.txt
+          python3 -c "import re,pathlib; s=pathlib.Path('app/build/outputs/mapping/release/mapping.txt').read_text(); pairs=re.findall(r'^([^ ]+) -> ([^ ]+):
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Release APK startup smoke test Android 15
+        if: steps.signing.outputs.signed == 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: bash scripts/smoke_startup_release.sh
+      - name: Preserve startup diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lazos-2.3.7-CODIGO28-startup-smoke
+          path: startup-smoke/
+          if-no-files-found: warn
+      - name: Inspect release AAB content
+        run: python3 scripts/verify_bundle.py
+      - name: Verify signed AAB jar signature
+        if: steps.signing.outputs.signed == 'true'
+        run: |
+          jarsigner -verify -verbose app/build/outputs/bundle/release/app-release.aab | tail -n 25
+          jarsigner -verify app/build/outputs/bundle/release/app-release.aab 2>&1 | grep -q 'jar verified'
+      - name: Upload signed AAB
+        if: steps.signing.outputs.signed == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lazos-de-Luto-2.3.7-CODIGO28-AAB-FIRMADO
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+      - name: Upload unsigned AAB (not Play uploadable)
+        if: steps.signing.outputs.signed != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lazos-de-Luto-2.3.7-CODIGO28-AAB-SIN-FIRMA
+          path: app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+,s,re.M); assert any(a!=b for a,b in pairs), 'No renamed classes'; print('Renamed classes:',sum(a!=b for a,b in pairs))"
+      - name: Preserve R8 mapping
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lazos-2.3.7-CODIGO28-R8-MAPPING
+          path: app/build/outputs/mapping/release/
+          if-no-files-found: error
       - name: Enable KVM group permissions
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -218,7 +277,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-2.3.6-CODIGO27-startup-smoke
+          name: Lazos-2.3.7-CODIGO28-startup-smoke
           path: startup-smoke/
           if-no-files-found: warn
       - name: Inspect release AAB content
@@ -232,13 +291,13 @@ jobs:
         if: steps.signing.outputs.signed == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-2.3.6-CODIGO27-AAB-FIRMADO
+          name: Lazos-de-Luto-2.3.7-CODIGO28-AAB-FIRMADO
           path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
       - name: Upload unsigned AAB (not Play uploadable)
         if: steps.signing.outputs.signed != 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: Lazos-de-Luto-2.3.6-CODIGO27-AAB-SIN-FIRMA
+          name: Lazos-de-Luto-2.3.7-CODIGO28-AAB-SIN-FIRMA
           path: app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
